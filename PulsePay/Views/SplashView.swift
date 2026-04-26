@@ -77,21 +77,20 @@ struct SplashView: View {
                 opacity = 1
             }
 
-            // ⏭️ If not logged in → show Auth
+            // ⏭️ Auto-login after splash delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                 if !isLoggedIn {
-                    showAuth = true
+                    isLoggedIn = true // 🚩 Auto-login after splash
                 }
             }
         }
-        // 🔐 AUTH SCREEN
-        .fullScreenCover(isPresented: $showAuth) {
-            AuthView { _ in
-                // ✅ LOGIN SUCCESS
-                isLoggedIn = true
-                showAuth = false
-            }
-        }
+        // .fullScreenCover(isPresented: $showAuth) {
+        //     AuthView { _ in
+        //         // ✅ LOGIN SUCCESS
+        //         isLoggedIn = true
+        //         showAuth = false
+        //     }
+        // }
+        // Auth presentation commented out for direct login
     }
 }
-
