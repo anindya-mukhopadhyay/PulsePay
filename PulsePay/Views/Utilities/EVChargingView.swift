@@ -1,125 +1,64 @@
 import SwiftUI
 
 struct EVChargingView: View {
+    @EnvironmentObject private var vm: PulsePayViewModel
+
+    private var isCurrentServiceActive: Bool {
+        vm.hasActiveSession && vm.activeService == .evCharging
+    }
 
     var body: some View {
         ZStack {
-
-            // 🖤 BACKGROUND
             AppColors.darkBG
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
-
-                    // ⚡ HEADER
+                VStack(spacing: 20) {
                     VStack(spacing: 10) {
-                        Image("EV")                 // 👈 EV.png from Assets
+                        Image("EV")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 250, height: 250)
+                            .frame(width: 170, height: 170)
 
                         Text("EV Charging")
                             .font(.largeTitle.bold())
                             .foregroundColor(AppColors.textOnDark)
 
-                        Text("All your EV charging needs in one place")
+                        Text("Per-second billing with instant provider settlement")
                             .font(.caption)
                             .foregroundColor(AppColors.textMutedOnDark)
                     }
                     .padding(.top, 20)
 
-                    // 🚀 PRIMARY ACTIONS
-                    VStack(spacing: 16) {
+                    statusCard
+                    settlementCard
+                    actionArea
 
-                        actionCard(
-                            icon: "qrcode.viewfinder",
-                            title: "Scan EV QR",
-                            subtitle: "Scan QR code at charging station"
-                        )
-
-                        actionCard(
-                            icon: "doc.text.fill",
-                            title: "Pay EV Bill",
-                            subtitle: "Enter charging bill details"
-                        )
-
-                        actionCard(
-                            icon: "clock.arrow.circlepath",
-                            title: "EV Bill History",
-                            subtitle: "View past EV charging payments"
-                        )
+                    if let reason = vm.lastStopReason, !reason.isEmpty {
+                        Text(reason)
+                            .font(.caption)
+                            .foregroundColor(.yellow)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(14)
                     }
 
-                    // 📍 DISCOVERY & UTILITIES
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("Discover EV Services")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        VStack(spacing: 12) {
-
-                            utilityRow(
-                                title: "Nearby EV Charging",
-                                subtitle: "Find charging stations around you"
-                            )
-
-                            utilityRow(
-                                title: "Available Chargers",
-                                subtitle: "Check charger availability status"
-                            )
-
-                            utilityRow(
-                                title: "Charging Rates",
-                                subtitle: "View per-unit & per-minute rates"
-                            )
-
-                            utilityRow(
-                                title: "Supported Networks",
-                                subtitle: "Tata Power, Ather, ChargeZone & more"
-                            )
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                    }
-
-                    // 🧾 RECENT EV BILLS (PREVIEW)
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("Recent EV Bills")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        VStack(spacing: 10) {
-                            billRow(name: "Tata Power EV", amount: "₹320.00")
-                            billRow(name: "Ather Grid", amount: "₹180.50")
-                            billRow(name: "ChargeZone", amount: "₹96.20")
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                    }
-
-                    // ℹ️ INFO / TRUST
                     VStack(alignment: .leading, spacing: 8) {
-
-                        Text("How EV charging works")
+                        Text("Prototype flow")
                             .font(.headline)
                             .foregroundColor(AppColors.textOnDark)
-
                         Text("""
-                            • Discover nearby EV chargers
-                            • Scan QR or pay bill manually
-                            • Transparent, digital EV billing
-                            """)
+• Charger sends usage pulse every second
+• PulsePay streams INR in the same second
+• Provider wallet settles instantly (no batch wait)
+""")
                         .font(.caption)
                         .foregroundColor(AppColors.textMutedOnDark)
                     }
                     .padding()
                     .background(Color.white.opacity(0.05))
-                    .cornerRadius(20)
+                    .cornerRadius(16)
 
                     Spacer(minLength: 40)
                 }
@@ -130,57 +69,116 @@ struct EVChargingView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - INLINE STATIC UI COMPONENTS
-
-    private func actionCard(icon: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 14) {
-
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(AppColors.positive)
-                .frame(width: 48, height: 48)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(14)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+    private var statusCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Live Session")
                     .font(.headline)
                     .foregroundColor(AppColors.textOnDark)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(AppColors.textMutedOnDark)
+                Spacer()
+                Text(isCurrentServiceActive ? "ACTIVE" : "IDLE")
+                    .font(.caption.bold())
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(isCurrentServiceActive ? Color.green.opacity(0.2) : Color.white.opacity(0.08))
+                    .foregroundColor(isCurrentServiceActive ? .green : AppColors.textMutedOnDark)
+                    .cornerRadius(10)
             }
 
-            Spacer()
+            statRow("Provider", vm.hasActiveSession ? vm.activeProviderName : UtilityServiceType.evCharging.providerName)
+            statRow("Rate / second", vm.formatCurrency(UtilityServiceType.evCharging.defaultRatePerSecond))
+            statRow("Rate / minute", vm.formatCurrency(UtilityServiceType.evCharging.defaultRatePerSecond * 60))
+            statRow("Duration", isCurrentServiceActive ? vm.formattedElapsedTime : "00:00")
+            statRow("Energy", isCurrentServiceActive ? vm.formatUnits(vm.activeUsageUnits, for: .evCharging) : "0 kWh")
+            statRow("Transferred", isCurrentServiceActive ? vm.formatCurrency(vm.currentSessionTransferred) : vm.formatCurrency(0))
         }
         .padding()
-        .background(Color.white.opacity(0.06))
+        .background(Color.white.opacity(0.07))
         .cornerRadius(18)
     }
 
-    private func utilityRow(title: String, subtitle: String) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .foregroundColor(AppColors.textOnDark)
-                Text(subtitle)
+    private var settlementCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Instant Settlement")
+                .font(.headline)
+                .foregroundColor(AppColors.textOnDark)
+            Text("Consumer wallet: \(vm.formatCurrency(vm.wallet.balance))")
+                .foregroundColor(AppColors.textOnDark)
+            Text("Provider wallet: \(vm.formatCurrency(vm.wallet.providerBalance))")
+                .foregroundColor(AppColors.textOnDark)
+            if let event = vm.lastSettlementEvent, isCurrentServiceActive {
+                Text("Last tick: \(vm.formatCurrency(event.amount)) at \(vm.formattedTimestamp(event.timestamp))")
                     .font(.caption)
                     .foregroundColor(AppColors.textMutedOnDark)
             }
-            Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundColor(AppColors.textMutedOnDark)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+    }
+
+    private var actionArea: some View {
+        VStack(spacing: 12) {
+            if vm.hasActiveSession && vm.activeService != .evCharging {
+                Text("Another utility stream is active. Stop it before starting EV charging.")
+                    .font(.caption)
+                    .foregroundColor(.yellow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+            } else if isCurrentServiceActive {
+                Button {
+                    vm.stopService(reason: "EV charging stopped by user")
+                } label: {
+                    Text("Stop Charging Stream")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.negative)
+                        .cornerRadius(14)
+                }
+            } else {
+                Button {
+                    vm.startService(.evCharging)
+                } label: {
+                    Text("Start Charging Stream")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.positive)
+                        .cornerRadius(14)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button("Top up INR 100") {
+                    vm.quickTopUp(100)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+
+                Button("Top up INR 250") {
+                    vm.quickTopUp(250)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+            }
+            .foregroundColor(AppColors.textOnDark)
         }
     }
 
-    private func billRow(name: String, amount: String) -> some View {
+    private func statRow(_ title: String, _ value: String) -> some View {
         HStack {
-            Text(name)
-                .foregroundColor(AppColors.textOnDark)
+            Text(title)
+                .foregroundColor(AppColors.textMutedOnDark)
             Spacer()
-            Text(amount)
+            Text(value)
                 .foregroundColor(AppColors.textOnDark)
         }
+        .font(.caption)
     }
 }

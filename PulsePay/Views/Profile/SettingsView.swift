@@ -1,21 +1,35 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @AppStorage("pulsepay.theme") private var storedTheme = AppTheme.system.rawValue
+    @AppStorage("pulsepay.language") private var storedLanguage = "English"
+
+    private var selectedTheme: Binding<AppTheme> {
+        Binding<AppTheme>(
+            get: { AppTheme(rawValue: storedTheme) ?? .system },
+            set: { storedTheme = $0.rawValue }
+        )
+    }
+
     var body: some View {
         ZStack {
             AppColors.darkBG.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("General app preferences.")
+                    Text("General app preferences")
                         .foregroundColor(AppColors.textMutedOnDark)
 
-                    VStack(spacing: 12) {
-                        pickerRow(title: "Theme", options: ["System", "Light", "Dark"], selection: 0)
-                        pickerRow(title: "Language", options: ["English", "Hindi"], selection: 0)
+                    VStack(spacing: 14) {
+                        themeRow
+                        languageRow
                     }
                     .padding()
                     .background(Color.white.opacity(0.06))
                     .cornerRadius(16)
+
+                    Text("Theme changes apply instantly across the app.")
+                        .font(.caption)
+                        .foregroundColor(AppColors.textMutedOnDark)
                 }
                 .padding()
             }
@@ -24,19 +38,31 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    @ViewBuilder
-    private func pickerRow(title: String, options: [String], selection: Int) -> some View {
+    private var themeRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Theme")
+                .foregroundColor(AppColors.textOnDark)
+
+            Picker("Theme", selection: selectedTheme) {
+                ForEach(AppTheme.allCases) { theme in
+                    Text(theme.displayName).tag(theme)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+
+    private var languageRow: some View {
         HStack {
-            Text(title)
+            Text("Language")
                 .foregroundColor(AppColors.textOnDark)
             Spacer()
-            Menu(options[selection]) {
-                ForEach(options, id: \.self) { opt in
-                    Button(opt) {}
-                }
+            Menu(storedLanguage) {
+                Button("English") { storedLanguage = "English" }
+                Button("Hindi") { storedLanguage = "Hindi" }
             }
             .foregroundColor(AppColors.textOnDark)
         }
-        .padding(.vertical, 10)
+        .padding(.top, 6)
     }
 }

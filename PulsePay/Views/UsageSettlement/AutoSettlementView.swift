@@ -1,14 +1,13 @@
 import SwiftUI
 
 struct AutoSettlementView: View {
+    @EnvironmentObject private var vm: PulsePayViewModel
 
     var body: some View {
         ZStack {
-
             AppColors.darkBG.ignoresSafeArea()
 
-            VStack(spacing: 26) {
-
+            VStack(spacing: 22) {
                 Image(systemName: "arrow.triangle.2.circlepath")
                     .font(.system(size: 52))
                     .foregroundColor(AppColors.positive)
@@ -17,13 +16,20 @@ struct AutoSettlementView: View {
                     .font(.largeTitle.bold())
                     .foregroundColor(AppColors.textOnDark)
 
-                Text("Automatic payment settlement for services")
+                Text("Continuous payment rail health")
                     .font(.caption)
                     .foregroundColor(AppColors.textMutedOnDark)
 
-                settingRow("Auto Debit", "Enabled")
-                settingRow("Settlement Cycle", "Daily")
-                settingRow("Linked Account", "PulsePay Wallet")
+                settingRow("Settlement mode", "Per-second")
+                settingRow("Current state", vm.hasActiveSession ? "Streaming" : "Idle")
+                settingRow("Total settled today", vm.formatCurrency(vm.totalTransferredToday))
+                settingRow("Provider wallet", vm.formatCurrency(vm.wallet.providerBalance))
+
+                if let event = vm.lastSettlementEvent {
+                    settingRow("Last settlement", vm.formattedTimestamp(event.timestamp))
+                } else {
+                    settingRow("Last settlement", "No settlement yet")
+                }
 
                 Spacer()
             }

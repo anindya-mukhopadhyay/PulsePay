@@ -12,12 +12,11 @@ enum SearchDestination: String, CaseIterable, Identifiable {
     case evCharging = "EV Charging"
     case publicWiFi = "Public WiFi"
     case smartParking = "Smart Parking"
-    case workPods = "Work Pods"
+    case gym = "GYM"
 
     // Usage & Settlement
     case liveUsage = "Live Usage"
     case liveBalance = "Live Balance"
-    case sessionHistory = "Session History"
     case autoSettlement = "Auto Settlement"
 
     // Profile
@@ -41,7 +40,7 @@ enum SearchDestination: String, CaseIterable, Identifiable {
             PublicWiFiView()
         case .smartParking:
             SmartParkingView()
-        case .workPods:
+        case .gym:
             GYMView()
 
         // Usage & Settlement
@@ -49,8 +48,6 @@ enum SearchDestination: String, CaseIterable, Identifiable {
             LiveUsageView()
         case .liveBalance:
             LiveBalanceView()
-        case .sessionHistory:
-            SessionHistoryView()
         case .autoSettlement:
             AutoSettlementView()
 

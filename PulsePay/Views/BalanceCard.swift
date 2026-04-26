@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BalanceCard: View {
+    @EnvironmentObject private var vm: PulsePayViewModel
 
     @State private var start: CGFloat = 0
     @State private var end: CGFloat = 0.25
@@ -9,7 +10,6 @@ struct BalanceCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
 
-            // TITLE + STATUS
             HStack {
                 Text("PulsePay Balance")
                     .font(.caption)
@@ -19,36 +19,33 @@ struct BalanceCard: View {
 
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(AppColors.positive)
+                        .fill(vm.hasActiveSession ? AppColors.positive : AppColors.textMutedOnDark)
                         .frame(width: 6, height: 6)
 
-                    Text("ACTIVE")
+                    Text(vm.hasActiveSession ? "STREAMING" : "READY")
                         .font(.caption2.bold())
-                        .foregroundColor(AppColors.positive)
+                        .foregroundColor(vm.hasActiveSession ? AppColors.positive : AppColors.textMutedOnDark)
                 }
             }
 
-            // BALANCE
-            Text("₹ 152.40")
+            Text(vm.formatCurrency(vm.wallet.balance))
                 .font(.system(size: 36, weight: .bold))
                 .foregroundColor(AppColors.textOnDark)
 
-            Text("Streaming payments ready")
+            Text(vm.hasActiveSession ? "Live debit in progress (\(vm.formattedElapsedTime))" : "Streaming payments ready")
                 .font(.caption)
                 .foregroundColor(AppColors.textMutedOnDark)
 
-            // 🔹 ADD MONEY ACTION
             HStack {
-
                 Button {
-                    // 🚀 Add money action (API later)
+                    vm.quickTopUp(100)
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 12))
 
-                        Text("Add Money")
-                            .font(.caption.bold())
+                        Text("Add INR 100")
+                        .font(.caption.bold())
                     }
                     .foregroundColor(.black)
                     .padding(.horizontal, 14)
@@ -59,11 +56,20 @@ struct BalanceCard: View {
 
                 Spacer()
 
-                Text("UPI • Cards • Wallet")
+                Text("Settled: \(vm.formatCurrency(vm.wallet.providerBalance))")
                     .font(.caption2)
                     .foregroundColor(AppColors.textMutedOnDark)
             }
             .padding(.top, 4)
+
+            if vm.hasActiveSession {
+                HStack {
+                    labelValue("Session", vm.activeService?.rawValue ?? "-")
+                    Spacer()
+                    labelValue("Transferred", vm.formatCurrency(vm.currentSessionTransferred))
+                }
+                .font(.caption2)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity)
@@ -103,6 +109,15 @@ struct BalanceCard: View {
                 start = 1
                 end = 1 + segment
             }
+        }
+    }
+
+    private func labelValue(_ title: String, _ value: String) -> some View {
+        HStack(spacing: 4) {
+            Text("\(title):")
+                .foregroundColor(AppColors.textMutedOnDark)
+            Text(value)
+                .foregroundColor(AppColors.textOnDark)
         }
     }
 }

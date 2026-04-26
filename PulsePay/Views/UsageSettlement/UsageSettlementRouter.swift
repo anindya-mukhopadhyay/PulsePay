@@ -9,8 +9,6 @@ struct UsageSettlementRouter {
             LiveUsageView()
         case "Live Balance":
             LiveBalanceView()
-        case "Session History":
-            SessionHistoryView()
         case "Auto Settlement":
             AutoSettlementView()
 
@@ -19,8 +17,6 @@ struct UsageSettlementRouter {
             BillingSummaryView()
         case "Invoices & Receipts":
             InvoicesReceiptsView()
-        case "Pending Dues":
-            PendingDuesView()
         case "Payment Methods":
             // Uses the existing PaymentMethodsView in your project
             PaymentMethodsView()

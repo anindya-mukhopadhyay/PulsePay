@@ -1,124 +1,50 @@
 import SwiftUI
 
 struct SmartParkingView: View {
+    @EnvironmentObject private var vm: PulsePayViewModel
+
+    private var isCurrentServiceActive: Bool {
+        vm.hasActiveSession && vm.activeService == .smartParking
+    }
 
     var body: some View {
         ZStack {
-
-            // 🖤 BACKGROUND
             AppColors.darkBG
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
-
-                    // 🅿️ HEADER
+                VStack(spacing: 20) {
                     VStack(spacing: 10) {
-                        Image("Parking_Car")   // 👈 custom asset
+                        Image("Parking_Car")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 270, height: 270)
+                            .frame(width: 190, height: 190)
 
                         Text("Smart Parking")
                             .font(.largeTitle.bold())
                             .foregroundColor(AppColors.textOnDark)
 
-                        Text("Pay & manage parking bills seamlessly")
+                        Text("Pay-per-minute parking with real-time settlement")
                             .font(.caption)
                             .foregroundColor(AppColors.textMutedOnDark)
                     }
                     .padding(.top, 20)
 
-                    // 🚀 PRIMARY PARKING ACTIONS
-                    VStack(spacing: 16) {
+                    liveStatusCard
+                    settlementCard
+                    actionCard
 
-                        actionCard(
-                            icon: "qrcode.viewfinder",
-                            title: "Scan Parking QR",
-                            subtitle: "Scan QR at parking entry or exit"
-                        )
-
-                        actionCard(
-                            icon: "car.fill",
-                            title: "Pay Parking Bill",
-                            subtitle: "Pay based on parking duration"
-                        )
-
-                        actionCard(
-                            icon: "clock.arrow.circlepath",
-                            title: "Parking History",
-                            subtitle: "View past parking payments"
-                        )
+                    if let reason = vm.lastStopReason, !reason.isEmpty {
+                        Text(reason)
+                            .font(.caption)
+                            .foregroundColor(.yellow)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(14)
                     }
 
-                    // 📍 PARKING SERVICES
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("Parking Services")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        VStack(spacing: 12) {
-                            serviceRow(
-                                title: "Nearby Parking Areas",
-                                subtitle: "Find available parking spots"
-                            )
-
-                            serviceRow(
-                                title: "Live Parking Time",
-                                subtitle: "Track parked duration in real time"
-                            )
-
-                            serviceRow(
-                                title: "Parking Rates",
-                                subtitle: "Hourly & daily parking charges"
-                            )
-
-                            serviceRow(
-                                title: "Supported Locations",
-                                subtitle: "Malls, offices, stations & more"
-                            )
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                    }
-
-                    // 🧾 RECENT PARKING BILLS
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("Recent Parking Bills")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        VStack(spacing: 10) {
-                            billRow(name: "City Mall Parking", amount: "₹120.00")
-                            billRow(name: "Metro Station Parking", amount: "₹60.00")
-                            billRow(name: "Office Complex", amount: "₹90.00")
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                    }
-
-                    // ℹ️ INFO / TRUST
-                    VStack(alignment: .leading, spacing: 8) {
-
-                        Text("How Smart Parking works")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        Text("""
-• Scan QR on entry or exit
-• Pay only for parked duration
-• Automatic billing with digital receipt
-""")
-                        .font(.caption)
-                        .foregroundColor(AppColors.textMutedOnDark)
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(16)
+                    infoCard
 
                     Spacer(minLength: 40)
                 }
@@ -129,57 +55,133 @@ struct SmartParkingView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - INLINE STATIC UI COMPONENTS
-
-    private func actionCard(icon: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 14) {
-
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(AppColors.positive)
-                .frame(width: 48, height: 48)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(14)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+    private var liveStatusCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Parking Session")
                     .font(.headline)
                     .foregroundColor(AppColors.textOnDark)
-
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(AppColors.textMutedOnDark)
+                Spacer()
+                Text(isCurrentServiceActive ? "ACTIVE" : "IDLE")
+                    .font(.caption.bold())
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(isCurrentServiceActive ? Color.green.opacity(0.2) : Color.white.opacity(0.08))
+                    .foregroundColor(isCurrentServiceActive ? .green : AppColors.textMutedOnDark)
+                    .cornerRadius(10)
             }
 
-            Spacer()
+            row("Provider", vm.hasActiveSession ? vm.activeProviderName : UtilityServiceType.smartParking.providerName)
+            row("Rate / second", vm.formatCurrency(UtilityServiceType.smartParking.defaultRatePerSecond))
+            row("Parked time", isCurrentServiceActive ? vm.formatUnits(vm.activeUsageUnits, for: .smartParking) : "0 min")
+            row("Duration", isCurrentServiceActive ? vm.formattedElapsedTime : "00:00")
+            row("Spent", isCurrentServiceActive ? vm.formatCurrency(vm.currentSessionTransferred) : vm.formatCurrency(0))
         }
         .padding()
-        .background(Color.white.opacity(0.06))
+        .background(Color.white.opacity(0.07))
         .cornerRadius(18)
     }
 
-    private func serviceRow(title: String, subtitle: String) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .foregroundColor(AppColors.textOnDark)
-
-                Text(subtitle)
+    private var settlementCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Settlement")
+                .font(.headline)
+                .foregroundColor(AppColors.textOnDark)
+            Text("Wallet: \(vm.formatCurrency(vm.wallet.balance))")
+                .foregroundColor(AppColors.textOnDark)
+            Text("Parking operator: \(vm.formatCurrency(vm.wallet.providerBalance))")
+                .foregroundColor(AppColors.textOnDark)
+            if let event = vm.lastSettlementEvent, isCurrentServiceActive {
+                Text("Last debit: \(vm.formatCurrency(event.amount)) at \(vm.formattedTimestamp(event.timestamp))")
                     .font(.caption)
                     .foregroundColor(AppColors.textMutedOnDark)
             }
-            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+    }
+
+    private var actionCard: some View {
+        VStack(spacing: 12) {
+            if vm.hasActiveSession && vm.activeService != .smartParking {
+                Text("Another utility stream is active. Stop it before starting Smart Parking.")
+                    .font(.caption)
+                    .foregroundColor(.yellow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+            } else if isCurrentServiceActive {
+                Button {
+                    vm.stopService(reason: "Parking session ended by user")
+                } label: {
+                    Text("End Parking Session")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.negative)
+                        .cornerRadius(14)
+                }
+            } else {
+                Button {
+                    vm.startService(.smartParking)
+                } label: {
+                    Text("Start Parking Session")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.positive)
+                        .cornerRadius(14)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button("Top up INR 100") {
+                    vm.quickTopUp(100)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+
+                Button("Top up INR 300") {
+                    vm.quickTopUp(300)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+            }
+            .foregroundColor(AppColors.textOnDark)
         }
     }
 
-    private func billRow(name: String, amount: String) -> some View {
-        HStack {
-            Text(name)
+    private var infoCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("How Smart Parking works")
+                .font(.headline)
                 .foregroundColor(AppColors.textOnDark)
+            Text("""
+• Entry gate starts session using QR token
+• Duration is metered every second
+• Operator receives continuous micro-settlements
+""")
+            .font(.caption)
+            .foregroundColor(AppColors.textMutedOnDark)
+        }
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+    }
+
+    private func row(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundColor(AppColors.textMutedOnDark)
             Spacer()
-            Text(amount)
+            Text(value)
                 .foregroundColor(AppColors.textOnDark)
         }
+        .font(.caption)
     }
 }
-

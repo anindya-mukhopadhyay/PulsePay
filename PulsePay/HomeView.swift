@@ -20,14 +20,12 @@ struct HomeView: View {
         DashboardItem(title: "Live Usage", icon: "waveform.path.ecg"),
         DashboardItem(title: "Live Balance", icon: "indianrupeesign.circle.fill"),
 
-        // 🔹 History & Bills
-        DashboardItem(title: "Session History", icon: "clock.arrow.circlepath"),
+        // 🔹 Bills
         DashboardItem(title: "Billing Summary", icon: "chart.bar.fill"),
         DashboardItem(title: "Invoices & Receipts", icon: "doc.text.fill"),
 
         // 🔹 Payments & Control
         DashboardItem(title: "Auto Settlement", icon: "arrow.triangle.2.circlepath"),
-        DashboardItem(title: "Pending Dues", icon: "exclamationmark.circle.fill"),
         DashboardItem(title: "Payment Methods", icon: "creditcard.fill"),
         DashboardItem(title: "Spending Limits", icon: "lock.fill")
     ]

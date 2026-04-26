@@ -1,117 +1,46 @@
 import SwiftUI
 
 struct PublicWiFiView: View {
+    @EnvironmentObject private var vm: PulsePayViewModel
+
+    private var isCurrentServiceActive: Bool {
+        vm.hasActiveSession && vm.activeService == .publicWiFi
+    }
 
     var body: some View {
         ZStack {
-
             AppColors.darkBG
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 26) {
-
-                    // 📶 HEADER
+                VStack(spacing: 22) {
                     VStack(spacing: 8) {
-                        Image("WiFi")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
+                        Image(systemName: "wifi")
+                            .font(.system(size: 56))
+                            .foregroundColor(AppColors.positive)
 
                         Text("Public WiFi")
                             .font(.largeTitle.bold())
                             .foregroundColor(AppColors.textOnDark)
 
-                        Text("Fast, secure & pay-as-you-use WiFi")
+                        Text("Real-time micro-streaming for each KB consumed")
                             .font(.caption)
                             .foregroundColor(AppColors.textMutedOnDark)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 24)
 
-                    // 📊 CURRENT USAGE SNAPSHOT (STATIC)
-                    VStack(alignment: .leading, spacing: 10) {
+                    sessionCard
+                    providerCard
+                    controls
 
-                        Text("Current Session")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Not Connected")
-                                    .foregroundColor(.yellow)
-                                    .font(.headline)
-
-                                Text("No active WiFi session")
-                                    .font(.caption)
-                                    .foregroundColor(AppColors.textMutedOnDark)
-                            }
-
-                            Spacer()
-
-                            VStack(alignment: .trailing, spacing: 4) {
-                                Text("₹ 0.00")
-                                    .font(.title3.bold())
-                                    .foregroundColor(AppColors.textOnDark)
-
-                                Text("Spent today")
-                                    .font(.caption)
-                                    .foregroundColor(AppColors.textMutedOnDark)
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.06))
-                    .cornerRadius(20)
-
-                    // 🚀 PRIMARY ACTIONS (GRID)
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("Actions")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        LazyVGrid(
-                            columns: [
-                                GridItem(.flexible()),
-                                GridItem(.flexible())
-                            ],
-                            spacing: 16
-                        ) {
-                            actionTile("qrcode.viewfinder", "Scan QR")
-                            actionTile("wifi", "Buy Data")
-                            actionTile("clock.arrow.circlepath", "Usage History")
-                            actionTile("antenna.radiowaves.left.and.right", "Nearby WiFi")
-                        }
-                    }
-
-                    // 📍 DISCOVERY / SERVICES
-                    VStack(alignment: .leading, spacing: 14) {
-
-                        Text("WiFi Services")
-                            .font(.headline)
-                            .foregroundColor(AppColors.textOnDark)
-
-                        VStack(spacing: 12) {
-                            serviceRow("Active Sessions", "View ongoing connections")
-                            serviceRow("Data Plans", "Hourly & daily packs")
-                            serviceRow("Supported Providers", "RailTel, Airtel, Jio")
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                    }
-
-                    // ℹ️ INFO
                     VStack(alignment: .leading, spacing: 8) {
-
-                        Text("How Public WiFi works")
+                        Text("IoT handshake concept")
                             .font(.headline)
                             .foregroundColor(AppColors.textOnDark)
-
                         Text("""
-• Scan QR or connect to hotspot
-• Pay only for time or data used
-• Secure auto-disconnect on expiry
+• Access point signs session start + wallet token
+• Gateway sends KB-usage pulses every second
+• Wallet rail settles each pulse instantly to provider
 """)
                         .font(.caption)
                         .foregroundColor(AppColors.textMutedOnDark)
@@ -129,35 +58,123 @@ struct PublicWiFiView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - UI ELEMENTS
+    private var sessionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Current Session")
+                    .font(.headline)
+                    .foregroundColor(AppColors.textOnDark)
+                Spacer()
+                Text(isCurrentServiceActive ? "CONNECTED" : "NOT CONNECTED")
+                    .font(.caption.bold())
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(isCurrentServiceActive ? Color.green.opacity(0.2) : Color.white.opacity(0.08))
+                    .foregroundColor(isCurrentServiceActive ? .green : AppColors.textMutedOnDark)
+                    .cornerRadius(10)
+            }
 
-    private func actionTile(_ icon: String, _ title: String) -> some View {
-        VStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 22))
-                .foregroundColor(AppColors.positive)
-
-            Text(title)
-                .font(.caption)
-                .foregroundColor(AppColors.textOnDark)
+            row("Provider", vm.hasActiveSession ? vm.activeProviderName : UtilityServiceType.publicWiFi.providerName)
+            row("Rate / second", vm.formatCurrency(UtilityServiceType.publicWiFi.defaultRatePerSecond))
+            row("Duration", isCurrentServiceActive ? vm.formattedElapsedTime : "00:00")
+            row("Data used", isCurrentServiceActive ? vm.formatUnits(vm.activeUsageUnits, for: .publicWiFi) : "0 KB")
+            row("Session spend", isCurrentServiceActive ? vm.formatCurrency(vm.currentSessionTransferred) : vm.formatCurrency(0))
         }
-        .frame(maxWidth: .infinity, minHeight: 90)
-        .background(Color.white.opacity(0.06))
+        .padding()
+        .background(Color.white.opacity(0.07))
         .cornerRadius(18)
     }
 
-    private func serviceRow(_ title: String, _ subtitle: String) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .foregroundColor(AppColors.textOnDark)
-                Text(subtitle)
+    private var providerCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Settlement Rail")
+                .font(.headline)
+                .foregroundColor(AppColors.textOnDark)
+            Text("User wallet: \(vm.formatCurrency(vm.wallet.balance))")
+                .foregroundColor(AppColors.textOnDark)
+            Text("Provider wallet: \(vm.formatCurrency(vm.wallet.providerBalance))")
+                .foregroundColor(AppColors.textOnDark)
+
+            if let event = vm.lastSettlementEvent, isCurrentServiceActive {
+                Text("Last settlement: \(vm.formatCurrency(event.amount)) at \(vm.formattedTimestamp(event.timestamp))")
                     .font(.caption)
                     .foregroundColor(AppColors.textMutedOnDark)
             }
-            Spacer()
-            Image(systemName: "chevron.right")
-                .foregroundColor(AppColors.textMutedOnDark)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+    }
+
+    private var controls: some View {
+        VStack(spacing: 12) {
+            if vm.hasActiveSession && vm.activeService != .publicWiFi {
+                Text("Another utility stream is active. Stop it before starting Public WiFi.")
+                    .font(.caption)
+                    .foregroundColor(.yellow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+            } else if isCurrentServiceActive {
+                Button {
+                    vm.stopService(reason: "Public WiFi session stopped by user")
+                } label: {
+                    Text("Stop WiFi Stream")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.negative)
+                        .cornerRadius(14)
+                }
+            } else {
+                Button {
+                    vm.startService(.publicWiFi)
+                } label: {
+                    Text("Start WiFi Stream")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColors.positive)
+                        .cornerRadius(14)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button("Top up INR 50") {
+                    vm.quickTopUp(50)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+
+                Button("Top up INR 150") {
+                    vm.quickTopUp(150)
+                }
+                .buttonStyle(.bordered)
+                .tint(AppColors.accentBlue)
+            }
+            .foregroundColor(AppColors.textOnDark)
+
+            if let reason = vm.lastStopReason, !reason.isEmpty {
+                Text(reason)
+                    .font(.caption)
+                    .foregroundColor(.yellow)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private func row(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundColor(AppColors.textMutedOnDark)
+            Spacer()
+            Text(value)
+                .foregroundColor(AppColors.textOnDark)
+        }
+        .font(.caption)
     }
 }
