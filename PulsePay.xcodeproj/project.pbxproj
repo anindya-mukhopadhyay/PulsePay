@@ -6,6 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		595FF1ED2F9F8D2E00DA9240 /* metamask-ios-sdk in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1EC2F9F8D2E00DA9240 /* metamask-ios-sdk */; };
+		595FF1F02F9FC2AF00DA9240 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1EF2F9FC2AF00DA9240 /* FirebaseAnalytics */; };
+		595FF1F22F9FC2AF00DA9240 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1F12F9FC2AF00DA9240 /* FirebaseAuth */; };
+		595FF1F42F9FC2AF00DA9240 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1F32F9FC2AF00DA9240 /* FirebaseAuthCombine-Community */; };
+		595FF1F62F9FC2AF00DA9240 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1F52F9FC2AF00DA9240 /* FirebaseCore */; };
+		595FF1F82F9FC2AF00DA9240 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1F72F9FC2AF00DA9240 /* FirebaseDatabase */; };
+		595FF1FA2F9FC2AF00DA9240 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1F92F9FC2AF00DA9240 /* FirebaseFirestore */; };
+		595FF1FC2F9FC2AF00DA9240 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF1FB2F9FC2AF00DA9240 /* FirebaseFunctions */; };
+		595FF2022F9FC2AF00DA9240 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF2012F9FC2AF00DA9240 /* FirebaseRemoteConfig */; };
+		595FF20B2F9FFD7900DA9240 /* Web3Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF20A2F9FFD7900DA9240 /* Web3Auth */; };
+		595FF20E2F9FFE2E00DA9240 /* web3swift in Frameworks */ = {isa = PBXBuildFile; productRef = 595FF20D2F9FFE2E00DA9240 /* web3swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		590926EE2F04608E009FB645 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +79,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				595FF20E2F9FFE2E00DA9240 /* web3swift in Frameworks */,
+				595FF2022F9FC2AF00DA9240 /* FirebaseRemoteConfig in Frameworks */,
+				595FF1F82F9FC2AF00DA9240 /* FirebaseDatabase in Frameworks */,
+				595FF1F02F9FC2AF00DA9240 /* FirebaseAnalytics in Frameworks */,
+				595FF1F62F9FC2AF00DA9240 /* FirebaseCore in Frameworks */,
+				595FF1FC2F9FC2AF00DA9240 /* FirebaseFunctions in Frameworks */,
+				595FF1F22F9FC2AF00DA9240 /* FirebaseAuth in Frameworks */,
+				595FF1ED2F9F8D2E00DA9240 /* metamask-ios-sdk in Frameworks */,
+				595FF20B2F9FFD7900DA9240 /* Web3Auth in Frameworks */,
+				595FF1F42F9FC2AF00DA9240 /* FirebaseAuthCombine-Community in Frameworks */,
+				595FF1FA2F9FC2AF00DA9240 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +150,17 @@
 			);
 			name = PulsePay;
 			packageProductDependencies = (
+				595FF1EC2F9F8D2E00DA9240 /* metamask-ios-sdk */,
+				595FF1EF2F9FC2AF00DA9240 /* FirebaseAnalytics */,
+				595FF1F12F9FC2AF00DA9240 /* FirebaseAuth */,
+				595FF1F32F9FC2AF00DA9240 /* FirebaseAuthCombine-Community */,
+				595FF1F52F9FC2AF00DA9240 /* FirebaseCore */,
+				595FF1F72F9FC2AF00DA9240 /* FirebaseDatabase */,
+				595FF1F92F9FC2AF00DA9240 /* FirebaseFirestore */,
+				595FF1FB2F9FC2AF00DA9240 /* FirebaseFunctions */,
+				595FF2012F9FC2AF00DA9240 /* FirebaseRemoteConfig */,
+				595FF20A2F9FFD7900DA9240 /* Web3Auth */,
+				595FF20D2F9FFE2E00DA9240 /* web3swift */,
 			);
 			productName = PulsePay;
 			productReference = 590926E02F04608C009FB645 /* PulsePay.app */;
@@ -208,6 +244,12 @@
 			);
 			mainGroup = 590926D72F04608C009FB645;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				595FF1EB2F9F8D2E00DA9240 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */,
+				595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				595FF2092F9FFD7900DA9240 /* XCRemoteSwiftPackageReference "web3auth-swift-sdk" */,
+				595FF20C2F9FFE2E00DA9240 /* XCRemoteSwiftPackageReference "web3swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 590926E12F04608C009FB645 /* Products */;
 			projectDirPath = "";
@@ -595,6 +637,99 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		595FF1EB2F9F8D2E00DA9240 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MetaMask/metamask-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.10;
+			};
+		};
+		595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.1;
+			};
+		};
+		595FF2092F9FFD7900DA9240 /* XCRemoteSwiftPackageReference "web3auth-swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Web3Auth/web3auth-swift-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.1;
+			};
+		};
+		595FF20C2F9FFE2E00DA9240 /* XCRemoteSwiftPackageReference "web3swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/web3swift-team/web3swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		595FF1EC2F9F8D2E00DA9240 /* metamask-ios-sdk */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EB2F9F8D2E00DA9240 /* XCRemoteSwiftPackageReference "metamask-ios-sdk" */;
+			productName = "metamask-ios-sdk";
+		};
+		595FF1EF2F9FC2AF00DA9240 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		595FF1F12F9FC2AF00DA9240 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		595FF1F32F9FC2AF00DA9240 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		595FF1F52F9FC2AF00DA9240 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		595FF1F72F9FC2AF00DA9240 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		595FF1F92F9FC2AF00DA9240 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		595FF1FB2F9FC2AF00DA9240 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		595FF2012F9FC2AF00DA9240 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF1EE2F9FC2AF00DA9240 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		595FF20A2F9FFD7900DA9240 /* Web3Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF2092F9FFD7900DA9240 /* XCRemoteSwiftPackageReference "web3auth-swift-sdk" */;
+			productName = Web3Auth;
+		};
+		595FF20D2F9FFE2E00DA9240 /* web3swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 595FF20C2F9FFE2E00DA9240 /* XCRemoteSwiftPackageReference "web3swift" */;
+			productName = web3swift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 590926D82F04608C009FB645 /* Project object */;
 }
