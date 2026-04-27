@@ -119,7 +119,8 @@ struct ReceiptExportService {
             ("Duration", formatDuration(session.totalDurationSeconds)),
             ("Usage", formatUsage(session.unitsConsumed, service: session.service)),
             ("Rate", "\(currencyFormatter.string(from: NSNumber(value: session.ratePerSecond)) ?? "INR 0.00") / sec"),
-            ("Amount Paid", currencyFormatter.string(from: NSNumber(value: session.amountTransferred)) ?? "INR 0.00")
+            ("Amount Paid", currencyFormatter.string(from: NSNumber(value: session.amountTransferred)) ?? "INR 0.00"),
+            ("Receipt Hash", "\(session.receiptHash.prefix(18))...\(session.receiptHash.suffix(10))")
         ]
 
         for line in lines {

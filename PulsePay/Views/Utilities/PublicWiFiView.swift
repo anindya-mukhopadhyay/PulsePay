@@ -131,9 +131,9 @@ struct PublicWiFiView: View {
                 }
             } else {
                 Button {
-                    vm.startService(.publicWiFi)
+                    NotificationCenter.default.post(name: NSNotification.Name("SwitchToScanTab"), object: nil)
                 } label: {
-                    Text("Start WiFi Stream")
+                    Text("Scan QR to Connect")
                         .font(.headline)
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)

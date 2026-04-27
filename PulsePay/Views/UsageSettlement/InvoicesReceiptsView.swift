@@ -91,6 +91,24 @@ struct InvoicesReceiptsView: View {
             .font(.caption2)
             .foregroundColor(AppColors.textMutedOnDark)
 
+            Text("Hash: \(session.receiptHash.prefix(12))...\(session.receiptHash.suffix(8))")
+                .font(.caption2)
+                .foregroundColor(AppColors.textMutedOnDark)
+
+            if let settlement = vm.settlement(for: session) {
+                HStack {
+                    Label(settlement.status.rawValue, systemImage: "link")
+                    Spacer()
+                    Text(settlement.shortTransactionHash)
+                }
+                .font(.caption2)
+                .foregroundColor(AppColors.positive)
+            } else {
+                Label("Not synced on-chain", systemImage: "link.badge.plus")
+                    .font(.caption2)
+                    .foregroundColor(AppColors.textMutedOnDark)
+            }
+
             HStack(spacing: 10) {
                 Button {
                     export(session: session, format: .pdf)

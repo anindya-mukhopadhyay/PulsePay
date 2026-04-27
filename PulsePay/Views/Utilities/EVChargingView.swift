@@ -142,9 +142,9 @@ struct EVChargingView: View {
                 }
             } else {
                 Button {
-                    vm.startService(.evCharging)
+                    NotificationCenter.default.post(name: NSNotification.Name("SwitchToScanTab"), object: nil)
                 } label: {
-                    Text("Start Charging Stream")
+                    Text("Scan QR to Connect")
                         .font(.headline)
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)

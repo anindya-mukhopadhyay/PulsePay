@@ -33,6 +33,19 @@ enum UtilityServiceType: String, CaseIterable, Identifiable {
         }
     }
 
+    var providerAddress: String {
+        switch self {
+        case .evCharging:
+            return "0x7f82b3ad6f4e61ad8cb8fc0b26cb5b18e3a52a91"
+        case .publicWiFi:
+            return "0x79bfcd02d112f305b7e36d0b477c6905c475f0d8"
+        case .smartParking:
+            return "0xa83f25cb6594c1b1f46d460df57f759a3173a6bd"
+        case .gymAccess:
+            return "0x5e9e5c455422cd0c2382ddf53c6f1c92c38df6a2"
+        }
+    }
+
     var unitName: String {
         switch self {
         case .evCharging:
@@ -89,6 +102,7 @@ enum UtilityServiceType: String, CaseIterable, Identifiable {
 struct StreamingSessionRecord: Identifiable {
     let id: UUID
     let invoiceNumber: String
+    let receiptHash: String
     let service: UtilityServiceType
     let providerName: String
     let ratePerSecond: Double

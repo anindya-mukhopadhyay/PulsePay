@@ -127,9 +127,9 @@ struct SmartParkingView: View {
                 }
             } else {
                 Button {
-                    vm.startService(.smartParking)
+                    NotificationCenter.default.post(name: NSNotification.Name("SwitchToScanTab"), object: nil)
                 } label: {
-                    Text("Start Parking Session")
+                    Text("Scan QR to Connect")
                         .font(.headline)
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)

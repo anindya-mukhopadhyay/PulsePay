@@ -19,5 +19,8 @@ struct MainTabView: View {
                 BottomTabBar(selectedTab: $selectedTab)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToScanTab"))) { _ in
+            selectedTab = 2
+        }
     }
 }

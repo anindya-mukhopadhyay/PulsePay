@@ -3,6 +3,7 @@ import PhotosUI
 
 struct ScanView: View {
 
+    @EnvironmentObject private var viewModel: PulsePayViewModel
     @Binding var selectedTab: Int
     @StateObject private var scanner = QRScannerViewModel()
     @State private var showPhotoPicker = false
@@ -80,6 +81,14 @@ struct ScanView: View {
         }
         .onAppear { scanner.startScanning() }
         .onDisappear { scanner.stopScanning() }
+        .onChange(of: scanner.scannedCode) { old, code in
+            guard let validCode = code else { return }
+            // Small delay to let the success animation show
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                viewModel.startServiceFromQR(code: validCode)
+                selectedTab = 0 // Return to Home screen to show active session
+            }
+        }
         .photosPicker(
             isPresented: $showPhotoPicker,
             selection: .constant(nil),

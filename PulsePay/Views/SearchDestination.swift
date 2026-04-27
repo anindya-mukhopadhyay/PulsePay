@@ -17,6 +17,7 @@ enum SearchDestination: String, CaseIterable, Identifiable {
     // Usage & Settlement
     case liveUsage = "Live Usage"
     case liveBalance = "Live Balance"
+    case blockchainWallet = "Blockchain Wallet"
     case autoSettlement = "Auto Settlement"
 
     // Profile
@@ -48,6 +49,8 @@ enum SearchDestination: String, CaseIterable, Identifiable {
             LiveUsageView()
         case .liveBalance:
             LiveBalanceView()
+        case .blockchainWallet:
+            BlockchainWalletView()
         case .autoSettlement:
             AutoSettlementView()
 

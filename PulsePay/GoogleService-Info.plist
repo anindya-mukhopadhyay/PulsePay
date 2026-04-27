@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>738258302368-unbuee9vm9k0qf5or863u6hekns9pj22.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.738258302368-unbuee9vm9k0qf5or863u6hekns9pj22</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAkkv0UjEHC_9wliD6v3X4IjONM3Gqx6HA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>738258302368</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>Glitch-Gods.PulsePay</string>
+	<key>PROJECT_ID</key>
+	<string>pulsepay-68775</string>
+	<key>STORAGE_BUCKET</key>
+	<string>pulsepay-68775.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:738258302368:ios:c5b110e25354796df6e0c5</string>
+</dict>
+</plist>

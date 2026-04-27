@@ -40,7 +40,7 @@ struct HistoryView: View {
                             .font(.headline)
                             .foregroundColor(AppColors.textOnDark)
 
-                        Text("Complete a streaming session from EV Charging or Public WiFi to see live history here.")
+                        Text("Complete a streaming session from EV, WiFi, Parking, or Gym to see transactions here.")
                             .font(.caption)
                             .foregroundColor(AppColors.textMutedOnDark)
                             .multilineTextAlignment(.center)
@@ -72,7 +72,7 @@ struct HistoryView: View {
                 .font(.largeTitle.bold())
                 .foregroundColor(AppColors.textOnDark)
 
-            Text("Live sessions synced from Usage & Settlement")
+            Text("Transactions from completed streams")
                 .font(.caption)
                 .foregroundColor(AppColors.textMutedOnDark)
         }
@@ -100,6 +100,12 @@ struct HistoryView: View {
             Text(session.invoiceNumber)
                 .font(.caption2)
                 .foregroundColor(AppColors.textMutedOnDark)
+
+            if let settlement = vm.settlement(for: session) {
+                Label("On-chain: \(settlement.shortTransactionHash)", systemImage: "link")
+                    .font(.caption2)
+                    .foregroundColor(AppColors.positive)
+            }
 
             HStack {
                 Text("Duration: \(vm.formattedDuration(seconds: session.totalDurationSeconds))")

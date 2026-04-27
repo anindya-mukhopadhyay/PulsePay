@@ -37,6 +37,34 @@ struct BalanceCard: View {
                 .foregroundColor(AppColors.textMutedOnDark)
 
             HStack {
+                if !vm.isWalletConnected {
+                    Button {
+                        vm.connectWeb3Auth()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "link.circle.fill") // Generic web3 icon
+                                .resizable().frame(width: 14, height: 14)
+                                .overlay(Circle().stroke(Color.blue, lineWidth: 1))
+                            
+                            Text("Connect Web3 Wallet")
+                                .font(.caption.bold())
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.blue.opacity(0.8))
+                        .cornerRadius(10)
+                    }
+                } else {
+                    Text(vm.walletAddress.prefix(6) + "..." + vm.walletAddress.suffix(4))
+                        .font(.caption2.monospaced())
+                        .padding(6)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(6)
+                }
+
+                Spacer()
+
                 Button {
                     vm.quickTopUp(100)
                 } label: {
@@ -53,12 +81,6 @@ struct BalanceCard: View {
                     .background(AppColors.positive)
                     .cornerRadius(10)
                 }
-
-                Spacer()
-
-                Text("Settled: \(vm.formatCurrency(vm.wallet.providerBalance))")
-                    .font(.caption2)
-                    .foregroundColor(AppColors.textMutedOnDark)
             }
             .padding(.top, 4)
 

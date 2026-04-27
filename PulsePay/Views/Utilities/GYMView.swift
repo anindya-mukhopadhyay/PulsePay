@@ -126,9 +126,9 @@ struct GYMView: View {
                 }
             } else {
                 Button {
-                    vm.startService(.gymAccess)
+                    NotificationCenter.default.post(name: NSNotification.Name("SwitchToScanTab"), object: nil)
                 } label: {
-                    Text("Start Gym Session")
+                    Text("Scan QR to Connect")
                         .font(.headline)
                         .foregroundColor(.black)
                         .frame(maxWidth: .infinity)

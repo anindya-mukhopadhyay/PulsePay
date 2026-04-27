@@ -2,10 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ALCHEMY_RPC_URL</key>
+	<string>https://polygon-amoy.g.alchemy.com/v2/YOUR_KEY</string>
+	<key>WEB3AUTH_CLIENT_ID</key>
+	<string>YOUR_CLIENT_ID</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>metamask</string>
+	</array>
 </dict>
 </plist>
