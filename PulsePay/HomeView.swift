@@ -25,7 +25,6 @@ struct HomeView: View {
         DashboardItem(title: "Invoices & Receipts", icon: "doc.text.fill"),
 
         // 🔹 Payments & Control
-        DashboardItem(title: "Blockchain Wallet", icon: "wallet.pass.fill"),
         DashboardItem(title: "Auto Settlement", icon: "arrow.triangle.2.circlepath"),
         DashboardItem(title: "Payment Methods", icon: "creditcard.fill"),
         DashboardItem(title: "Spending Limits", icon: "lock.fill")

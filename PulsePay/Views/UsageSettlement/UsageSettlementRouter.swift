@@ -17,8 +17,6 @@ struct UsageSettlementRouter {
             BillingSummaryView()
         case "Invoices & Receipts":
             InvoicesReceiptsView()
-        case "Blockchain Wallet":
-            BlockchainWalletView()
         case "Payment Methods":
             // Uses the existing PaymentMethodsView in your project
             PaymentMethodsView()

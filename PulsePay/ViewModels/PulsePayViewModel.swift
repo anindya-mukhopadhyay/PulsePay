@@ -116,7 +116,7 @@ final class PulsePayViewModel: ObservableObject {
     }
 
     // MARK: - Backend Sync
-    private let apiBaseURL = "http://192.168.29.186:5001/api"
+    private let apiBaseURL = "http://10.220.221.90:5001/api"
     private var backendUserWalletId: String?
     private var backendSessionId: String?
     private var backendRatePerSecond: Double = 0.32 // Default fallback

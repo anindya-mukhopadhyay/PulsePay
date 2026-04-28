@@ -26,7 +26,7 @@ struct AuthService {
 
     // ✅ Your Mac LAN IP + backend port
     var baseURL: URL {
-        URL(string: "http://192.168.29.186:5001/api")!
+        URL(string: "http://10.220.221.90:5001/api")!
     }
 
     private let decoder = JSONDecoder()
