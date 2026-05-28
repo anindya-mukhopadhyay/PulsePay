@@ -2,12 +2,15 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import ChainTransactions from './pages/admin/ChainTransactions';
 import ManageStores from './pages/admin/ManageStores';
 import ManageUsers from './pages/admin/ManageUsers';
 import OwnerDashboard from './pages/owner/OwnerDashboard';
 import MyServices from './pages/owner/MyServices';
 import ServiceQR from './pages/owner/ServiceQR';
 import SessionHistory from './pages/owner/SessionHistory';
+import ClientDashboard from './pages/client/ClientDashboard';
+import ClientChainActivity from './pages/client/ClientChainActivity';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -35,10 +38,11 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to={role === 'admin' ? '/admin' : '/owner'} replace /> : <LoginPage />} />
+      <Route path="/login" element={user ? <Navigate to={role === 'admin' ? '/admin' : role === 'owner' ? '/owner' : '/client'} replace /> : <LoginPage />} />
 
       {/* Admin Routes */}
       <Route path="/admin" element={<ProtectedRoute allowedRole="admin"><DashboardLayout title="Dashboard" subtitle="Platform overview"><AdminDashboard /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/admin/chain" element={<ProtectedRoute allowedRole="admin"><DashboardLayout title="Chain Transactions" subtitle="Live blockchain settlement monitor"><ChainTransactions /></DashboardLayout></ProtectedRoute>} />
       <Route path="/admin/stores" element={<ProtectedRoute allowedRole="admin"><DashboardLayout title="Manage Stores" subtitle="Verify and manage store accounts"><ManageStores /></DashboardLayout></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute allowedRole="admin"><DashboardLayout title="Manage Users" subtitle="View all registered users"><ManageUsers /></DashboardLayout></ProtectedRoute>} />
 
@@ -47,6 +51,10 @@ export default function App() {
       <Route path="/owner/services" element={<ProtectedRoute allowedRole="owner"><DashboardLayout title="My Services" subtitle="Manage services & QR codes"><MyServices /></DashboardLayout></ProtectedRoute>} />
       <Route path="/owner/services/:qrCodeId/qr" element={<ProtectedRoute allowedRole="owner"><DashboardLayout title="Service QR Code" subtitle="Display or print this QR"><ServiceQR /></DashboardLayout></ProtectedRoute>} />
       <Route path="/owner/sessions" element={<ProtectedRoute allowedRole="owner"><DashboardLayout title="Session History" subtitle="View earnings & session logs"><SessionHistory /></DashboardLayout></ProtectedRoute>} />
+
+      {/* Client Routes */}
+      <Route path="/client" element={<ProtectedRoute allowedRole="client"><DashboardLayout title="Client Wallet" subtitle="Real balance, service-wise payments, and account details"><ClientDashboard /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/client/chain" element={<ProtectedRoute allowedRole="client"><DashboardLayout title="Chain Activity" subtitle="All blockchain transactions, receipts, and invoice history"><ClientChainActivity /></DashboardLayout></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

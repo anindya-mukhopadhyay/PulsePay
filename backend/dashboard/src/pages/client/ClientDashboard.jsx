@@ -1,91 +1,99 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '../../api';
 import { useAuth } from '../../context/AuthContext';
+
+function walletIdOf(user) {
+  return user?.walletId?._id || user?.walletId || '';
+}
 
 function formatMoney(amount) {
   return `₹${Number(amount || 0).toFixed(2)}`;
 }
 
-export default function OwnerDashboard() {
+export default function ClientDashboard() {
   const { user } = useAuth();
-  const walletId = user?.walletId?._id || user?.walletId || '';
-  const [services, setServices] = useState([]);
   const [balance, setBalance] = useState(null);
-  const [activity, setActivity] = useState({ totals: {}, serviceBreakdown: [] });
-  const [activeSessions, setActiveSessions] = useState([]);
+  const [activity, setActivity] = useState({ totals: {}, serviceBreakdown: [], recentReceipts: [], recentSettlements: [] });
   const [chainTx, setChainTx] = useState([]);
+  const [chainError, setChainError] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !walletId) return;
+    const walletId = walletIdOf(user);
+    if (!walletId) {
+      setLoading(false);
+      return;
+    }
 
     let mounted = true;
     const load = async () => {
       try {
-        const [serviceRes, balanceRes, activityRes, activeRes, chainRes] = await Promise.all([
-          api.getStoreServices(user._id),
+        const [balanceRes, activityRes, chainRes] = await Promise.all([
           api.getWalletBalance(walletId, true),
           api.getWalletActivity(walletId),
-          api.getSessionsByStore(user._id),
-          api.getWalletOnChainTransactions(walletId, 12),
+          api.getWalletOnChainTransactions(walletId, 15),
         ]);
 
         if (!mounted) return;
-        setServices(serviceRes.data || []);
         setBalance(balanceRes.data || null);
-        setActivity(activityRes.data || { totals: {}, serviceBreakdown: [] });
-        setActiveSessions(activeRes.data || []);
+        setActivity(activityRes.data || { totals: {}, serviceBreakdown: [], recentReceipts: [], recentSettlements: [] });
         setChainTx(chainRes.data?.transactions || []);
-      } catch (_) {
+        setChainError(chainRes.data?.explorerError || '');
+      } catch (err) {
+        if (!mounted) return;
+        setChainError(err.message || 'Failed to fetch wallet data');
       } finally {
         if (mounted) setLoading(false);
       }
     };
 
     load();
-    const interval = setInterval(load, 8000);
+    const timer = setInterval(load, 10000);
     return () => {
       mounted = false;
-      clearInterval(interval);
+      clearInterval(timer);
     };
-  }, [user, walletId]);
+  }, [user]);
+
+  const onChainBalance = useMemo(
+    () => Number(balance?.onChain?.paymentAsset?.balance || 0),
+    [balance]
+  );
 
   return (
     <div className="animate-in">
       <div className="stats-grid">
         <div className="glass-card stat-card purple">
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon">💳</div>
           <div className="stat-value">{formatMoney(balance?.availableBalance || 0)}</div>
-          <div className="stat-label">Available Settlement Balance</div>
+          <div className="stat-label">Wallet Available Balance (Ledger)</div>
         </div>
         <div className="glass-card stat-card cyan">
           <div className="stat-icon">⛓️</div>
-          <div className="stat-value">
-            {Number(balance?.onChain?.paymentAsset?.balance || 0).toFixed(6)} {balance?.onChain?.paymentAsset?.symbol || ''}
-          </div>
+          <div className="stat-value">{onChainBalance.toFixed(6)} {balance?.onChain?.paymentAsset?.symbol || ''}</div>
           <div className="stat-label">Live On-chain Balance</div>
         </div>
         <div className="glass-card stat-card blue">
-          <div className="stat-icon">⚡</div>
-          <div className="stat-value">{services.length}</div>
-          <div className="stat-label">Configured Services</div>
+          <div className="stat-icon">📜</div>
+          <div className="stat-value">{activity?.totals?.totalSessions || 0}</div>
+          <div className="stat-label">Completed Streaming Sessions</div>
         </div>
-        <div className="glass-card stat-card green">
-          <div className="stat-icon">🟢</div>
-          <div className="stat-value">{activeSessions.length}</div>
-          <div className="stat-label">Active Sessions</div>
+        <div className="glass-card stat-card orange">
+          <div className="stat-icon">💸</div>
+          <div className="stat-value">{formatMoney(activity?.totals?.totalAmount || 0)}</div>
+          <div className="stat-label">Total Paid Across Services</div>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20, marginBottom: 24 }}>
         <div className="glass-card" style={{ padding: 20 }}>
           <div className="page-header" style={{ marginBottom: 16 }}>
-            <h2 style={{ fontSize: 18 }}>Service-wise Revenue</h2>
+            <h2 style={{ fontSize: 18 }}>Service-wise Payments</h2>
           </div>
-          {(activity.serviceBreakdown || []).length === 0 ? (
+          {(activity?.serviceBreakdown || []).length === 0 ? (
             <div className="empty-state" style={{ padding: '24px 8px' }}>
-              <div className="empty-icon">📈</div>
-              <h3>{loading ? 'Loading revenue data...' : 'No completed sessions yet'}</h3>
+              <div className="empty-icon">📊</div>
+              <h3>{loading ? 'Loading service data...' : 'No paid sessions yet'}</h3>
             </div>
           ) : (
             <div className="data-table-wrap">
@@ -94,7 +102,7 @@ export default function OwnerDashboard() {
                   <tr>
                     <th>Service</th>
                     <th>Sessions</th>
-                    <th>Total Revenue</th>
+                    <th>Total Paid</th>
                     <th>Avg / Session</th>
                   </tr>
                 </thead>
@@ -118,40 +126,44 @@ export default function OwnerDashboard() {
 
         <div className="glass-card" style={{ padding: 20 }}>
           <div className="page-header" style={{ marginBottom: 16 }}>
-            <h2 style={{ fontSize: 18 }}>Settlement Account</h2>
+            <h2 style={{ fontSize: 18 }}>Wallet Account</h2>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ padding: 12, border: '1px solid var(--border-glass)', borderRadius: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Store</div>
-              <div style={{ fontWeight: 700 }}>{user?.storeName}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Primary On-chain Address</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--accent-cyan)' }}>{balance?.onChainAddress || 'Not linked'}</div>
             </div>
             <div style={{ padding: 12, border: '1px solid var(--border-glass)', borderRadius: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>On-chain Address</div>
-              <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--accent-cyan)' }}>
-                {balance?.onChainAddress || user?.walletId?.evmAddress || 'Not linked'}
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Native Balance</div>
+              <div style={{ fontWeight: 700 }}>
+                {Number(balance?.onChain?.native?.balance || 0).toFixed(6)} {balance?.onChain?.native?.symbol || ''}
               </div>
             </div>
             <div style={{ padding: 12, border: '1px solid var(--border-glass)', borderRadius: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Total Ended Sessions</div>
-              <div style={{ fontWeight: 700 }}>{activity?.totals?.totalSessions || 0}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Payment Asset</div>
+              <div style={{ fontWeight: 700 }}>
+                {Number(balance?.onChain?.paymentAsset?.balance || 0).toFixed(6)} {balance?.onChain?.paymentAsset?.symbol || ''}
+              </div>
             </div>
-            <div style={{ padding: 12, border: '1px solid var(--border-glass)', borderRadius: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Total Revenue</div>
-              <div style={{ fontWeight: 700 }}>{formatMoney(activity?.totals?.totalAmount || 0)}</div>
-            </div>
+            {balance?.onChainError && (
+              <div className="login-error" style={{ margin: 0 }}>
+                {balance.onChainError}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="glass-card" style={{ padding: 20 }}>
         <div className="page-header" style={{ marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18 }}>Latest Chain Transactions</h2>
-          <span className="badge blue">{chainTx.length}</span>
+          <h2 style={{ fontSize: 18 }}>Recent On-chain Transactions</h2>
+          <span className="badge blue">{chainTx.length} records</span>
         </div>
+        {chainError && <div className="login-error">{chainError}</div>}
         {chainTx.length === 0 ? (
           <div className="empty-state" style={{ padding: '24px 8px' }}>
             <div className="empty-icon">⛓️</div>
-            <h3>{loading ? 'Loading chain activity...' : 'No chain transactions yet'}</h3>
+            <h3>{loading ? 'Loading transactions...' : 'No chain transactions found for this wallet'}</h3>
           </div>
         ) : (
           <div className="data-table-wrap">
@@ -166,8 +178,8 @@ export default function OwnerDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {chainTx.map((tx, idx) => (
-                  <tr key={`${tx.hash || idx}-${idx}`}>
+                {chainTx.map((tx, index) => (
+                  <tr key={`${tx.hash || 'row'}-${index}`}>
                     <td>{tx.timestamp ? new Date(tx.timestamp).toLocaleString() : '—'}</td>
                     <td><span className={`badge ${tx.status === 'ok' || tx.status === 'CONFIRMED' ? 'green' : tx.status === 'error' || tx.status === 'FAILED' ? 'red' : 'orange'}`}>{String(tx.status || 'unknown').toUpperCase()}</span></td>
                     <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{tx.from ? `${tx.from.slice(0, 8)}…${tx.from.slice(-6)}` : '—'}</td>

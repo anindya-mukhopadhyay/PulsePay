@@ -20,6 +20,9 @@ struct PulsePayApp: App {
             ContentView()
                 .environmentObject(pulsePayVM)
                 .preferredColorScheme(resolvedTheme.colorScheme)
+                .onOpenURL { url in
+                    MetaMaskConnector.shared.handleOpenURL(url)
+                }
         }
     }
 

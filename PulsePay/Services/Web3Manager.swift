@@ -1,62 +1,72 @@
 import Foundation
-import FirebaseAuth
-
-// ---------------------------------------------------------
-// 🚀 MINIMAL MOCK WEB3MANAGER
-// This bypasses all web3swift and Web3Auth compiler errors
-// so your app builds and runs instantly for your demo!
-// ---------------------------------------------------------
 
 final class Web3Manager {
-    
     static let shared = Web3Manager()
-    private var walletAddress: String?
-    
+
     private init() {}
-    
-    // MARK: - Initialize
+
     func initialize() {
-        print("🟢 [MOCK] Web3Manager Initialized")
+        _ = MetaMaskConnector.shared
     }
-    
-    // MARK: - Login
+
     func loginWithFirebaseJWT() async throws -> String {
-        print("🔵 [MOCK] Logging in... Simulating blockchain key generation...")
-        
-        // 1.5 second delay to simulate network request
-        try await Task.sleep(nanoseconds: 1_500_000_000)
-        
-        // Generate a random mock Ethereum address
-        let randomHex = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
-        let mockAddress = "0x" + String(randomHex.prefix(40))
-        
-        self.walletAddress = mockAddress
-        return mockAddress
+        try await MetaMaskConnector.shared.connectAsync()
     }
-    
-    // MARK: - Get Wallet Address
+
     func getWalletAddress() -> String? {
-        return walletAddress
+        MetaMaskConnector.shared.connectedAddress.isEmpty ? nil : MetaMaskConnector.shared.connectedAddress
     }
-    
-    // MARK: - Get Balance
+
+    func getChainId() -> String {
+        MetaMaskConnector.shared.connectedChainId
+    }
+
+    func getNativeTokenSymbol() -> String {
+        Self.nativeTokenSymbol(for: getChainId())
+    }
+
     func getBalance() async throws -> String {
-        // 0.5 second delay
-        try await Task.sleep(nanoseconds: 500_000_000)
-        return "1.5000 MATIC" // Simulated balance
+        try await MetaMaskConnector.shared.getBalanceAsync()
     }
-    
-    // MARK: - Send Transaction
+
+    func getPortfolio() async throws -> WalletPortfolioSnapshot {
+        try await MetaMaskConnector.shared.getPortfolioAsync()
+    }
+
+    func disconnect() {
+        MetaMaskConnector.shared.disconnect()
+    }
+
     func sendTransaction(to: String, amount: String) async throws -> String {
-        print("🔵 [MOCK] Sending \(amount) MATIC to \(to)...")
-        
-        // 2 second delay to simulate blockchain confirmation
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        
-        // Generate a mock transaction hash
-        let randomHash = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased() + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
-        let txHash = "0x" + String(randomHash.prefix(64))
-        
-        return txHash
+        let value = Self.ethAmountToWeiHex(amount)
+        return try await MetaMaskConnector.shared.sendTransactionAsync(to: to, value: value)
+    }
+
+    private static func ethAmountToWeiHex(_ amount: String) -> String {
+        let decimal = Decimal(string: amount) ?? 0
+        let weiDecimal = decimal * Decimal(1_000_000_000_000_000_000)
+        let wei = NSDecimalNumber(decimal: weiDecimal).uint64Value
+        return "0x\(String(wei, radix: 16))"
+    }
+
+    private static func nativeTokenSymbol(for chainId: String) -> String {
+        switch normalizedChainId(chainId) {
+        case "0x89", "0x13882":
+            return "POL"
+        default:
+            return "ETH"
+        }
+    }
+
+    private static func normalizedChainId(_ chainId: String) -> String {
+        let trimmed = chainId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !trimmed.isEmpty else { return "" }
+        if trimmed.hasPrefix("0x") {
+            return trimmed
+        }
+        if let decimalChainId = Int(trimmed) {
+            return "0x\(String(decimalChainId, radix: 16))"
+        }
+        return trimmed
     }
 }

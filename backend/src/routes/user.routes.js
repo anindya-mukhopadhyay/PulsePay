@@ -1,7 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import Wallet from "../models/Wallet.js";
-import blockchainService from "../services/blockchain.service.js";
 import { asyncHandler } from "../utils/helpers.js";
 
 const router = Router();
@@ -31,12 +30,11 @@ router.post(
     // Create user first (password gets hashed in pre-save)
     const user = await User.create({ fullName, email, phone, password });
 
-    // Auto-create wallet with deterministic EVM address
-    const evmAddress = blockchainService.generateEvmAddress(`user:${user._id}`);
+    // Auto-create an internal wallet record. The real MetaMask address is
+    // linked later with a signed ownership challenge.
     const wallet = await Wallet.create({
       ownerType: "USER",
       ownerId: user._id,
-      evmAddress,
     });
 
     // Link wallet to user

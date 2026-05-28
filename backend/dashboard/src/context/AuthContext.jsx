@@ -30,6 +30,16 @@ export function AuthProvider({ children }) {
     return u;
   }, []);
 
+  const loginClient = useCallback(async (email, password) => {
+    const res = await api.userLogin(email, password);
+    const u = { ...res.data, role: 'client' };
+    setUser(u);
+    setRole('client');
+    localStorage.setItem('pp_user', JSON.stringify(u));
+    localStorage.setItem('pp_role', 'client');
+    return u;
+  }, []);
+
   const logout = useCallback(() => {
     setUser(null);
     setRole(null);
@@ -38,7 +48,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, loginAdmin, loginOwner, logout }}>
+    <AuthContext.Provider value={{ user, role, loginAdmin, loginOwner, loginClient, logout }}>
       {children}
     </AuthContext.Provider>
   );

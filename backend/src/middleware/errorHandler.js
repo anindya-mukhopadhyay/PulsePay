@@ -6,7 +6,7 @@ import { env } from "../config/env.js";
  */
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, _req, res, _next) {
-  const statusCode = err.statusCode || res.statusCode === 200 ? 500 : res.statusCode;
+  const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
 
   res.status(statusCode).json({
     success: false,

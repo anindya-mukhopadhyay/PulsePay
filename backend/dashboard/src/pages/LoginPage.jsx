@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { loginAdmin, loginOwner } = useAuth();
+  const { loginAdmin, loginOwner, loginClient } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,9 +19,12 @@ export default function LoginPage() {
       if (tab === 'admin') {
         await loginAdmin(email, password);
         navigate('/admin');
-      } else {
+      } else if (tab === 'owner') {
         await loginOwner(email, password);
         navigate('/owner');
+      } else {
+        await loginClient(email, password);
+        navigate('/client');
       }
     } catch (err) {
       setError(err.message);
@@ -46,6 +49,9 @@ export default function LoginPage() {
           <button className={`login-tab ${tab === 'owner' ? 'active' : ''}`} onClick={() => { setTab('owner'); setError(''); }}>
             🏪 Store Owner
           </button>
+          <button className={`login-tab ${tab === 'client' ? 'active' : ''}`} onClick={() => { setTab('client'); setError(''); }}>
+            👤 Client
+          </button>
         </div>
 
         {error && <div className="login-error">⚠️ {error}</div>}
@@ -53,14 +59,21 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
-            <input className="form-input" type="email" placeholder={tab === 'admin' ? 'admin@pulsepay.local' : 'store@example.com'} value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input
+              className="form-input"
+              type="email"
+              placeholder={tab === 'admin' ? 'admin@pulsepay.local' : tab === 'owner' ? 'store@example.com' : 'user@example.com'}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
             <input className="form-input" type="password" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
-            {loading ? '⏳ Signing in…' : `Sign in as ${tab === 'admin' ? 'Admin' : 'Store Owner'}`}
+            {loading ? '⏳ Signing in…' : `Sign in as ${tab === 'admin' ? 'Admin' : tab === 'owner' ? 'Store Owner' : 'Client'}`}
           </button>
         </form>
       </div>

@@ -36,6 +36,43 @@ struct BalanceCard: View {
                 .font(.caption)
                 .foregroundColor(AppColors.textMutedOnDark)
 
+            if vm.isWalletConnected {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("MetaMask Total Assets")
+                            .font(.caption2)
+                            .foregroundColor(AppColors.textMutedOnDark)
+                        Text(vm.blockchainPortfolioHeadline)
+                            .font(.caption.bold())
+                            .foregroundColor(AppColors.positive)
+                        Text(vm.blockchainPortfolioSummary)
+                            .font(.caption2.bold())
+                            .foregroundColor(AppColors.textOnDark)
+                        Text("Active: \(vm.blockchainWallet.network.rawValue)")
+                            .font(.caption2)
+                            .foregroundColor(AppColors.textMutedOnDark)
+                    }
+
+                    Spacer()
+
+                    Button {
+                        vm.refreshBlockchainBalance()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.caption.bold())
+                            .foregroundColor(AppColors.textOnDark)
+                            .padding(8)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("Refresh MetaMask balance")
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(Color.white.opacity(0.06))
+                .cornerRadius(10)
+            }
+
             HStack {
                 if !vm.isWalletConnected {
                     Button {

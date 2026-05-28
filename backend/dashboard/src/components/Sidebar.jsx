@@ -9,6 +9,7 @@ export default function Sidebar() {
 
   const adminNav = [
     { to: '/admin', icon: '📊', label: 'Dashboard' },
+    { to: '/admin/chain', icon: '⛓️', label: 'Chain Txns' },
     { to: '/admin/stores', icon: '🏪', label: 'Manage Stores' },
     { to: '/admin/users', icon: '👥', label: 'Manage Users' },
   ];
@@ -19,7 +20,12 @@ export default function Sidebar() {
     { to: '/owner/sessions', icon: '📜', label: 'Session History' },
   ];
 
-  const navItems = role === 'admin' ? adminNav : ownerNav;
+  const clientNav = [
+    { to: '/client', icon: '💳', label: 'My Wallet' },
+    { to: '/client/chain', icon: '⛓️', label: 'Chain Activity' },
+  ];
+
+  const navItems = role === 'admin' ? adminNav : role === 'owner' ? ownerNav : clientNav;
 
   return (
     <aside className="sidebar">
@@ -49,7 +55,7 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>
-          {role === 'admin' ? user?.email : user?.storeName}
+          {role === 'admin' ? user?.email : role === 'owner' ? user?.storeName : user?.email}
         </div>
         <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={handleLogout}>
           🚪 Logout

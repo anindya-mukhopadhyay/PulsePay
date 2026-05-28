@@ -41,7 +41,7 @@ const storeSchema = new mongoose.Schema(
     storeType: {
       type: String,
       required: [true, "Store type is required"],
-      enum: ["GYM", "EV", "WIFI", "PARKING"],
+      enum: ["GYM", "EV", "WIFI", "PARKING", "CONTENT", "COWORK", "LOUNGE", "STORAGE"],
     },
     location: {
       address: { type: String, required: true },

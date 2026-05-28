@@ -46,6 +46,40 @@ const streamSessionSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    invoiceNumber: {
+      type: String,
+      default: "",
+      index: true,
+    },
+    receiptHash: {
+      type: String,
+      default: "",
+      index: true,
+    },
+    receiptId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Receipt",
+      default: null,
+    },
+    paymentIntentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PaymentIntent",
+      default: null,
+    },
+    settlementId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Settlement",
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["NOT_REQUIRED", "REQUIRES_PAYMENT", "INTENT_CREATED", "SUBMITTED", "CONFIRMED", "FAILED"],
+      default: "REQUIRES_PAYMENT",
+    },
+    unitsConsumed: {
+      type: Number,
+      default: 0,
+    },
     onChainFlowId: {
       type: String,
       default: null,

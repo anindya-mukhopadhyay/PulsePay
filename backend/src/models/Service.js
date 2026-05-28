@@ -16,7 +16,7 @@ const serviceSchema = new mongoose.Schema(
     serviceType: {
       type: String,
       required: [true, "Service type is required"],
-      enum: ["EV", "WIFI", "PARKING", "GYM"],
+      enum: ["EV", "WIFI", "PARKING", "GYM", "CONTENT", "COWORK", "LOUNGE", "STORAGE"],
       default: "EV",
     },
     ratePerSecond: {

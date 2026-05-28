@@ -454,6 +454,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 97H55F9669;
 				ENABLE_PREVIEWS = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PulsePay/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PulsePay needs camera access to scan QR codes";
@@ -488,6 +489,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 97H55F9669;
 				ENABLE_PREVIEWS = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PulsePay/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PulsePay needs camera access to scan QR codes";

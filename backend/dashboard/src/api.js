@@ -5,8 +5,16 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Request failed');
+
+  // Safely parse JSON — guard against empty bodies (204, network errors, HTML pages)
+  const contentType = res.headers.get('content-type') || '';
+  let data = {};
+  if (contentType.includes('application/json')) {
+    const text = await res.text();
+    data = text ? JSON.parse(text) : {};
+  }
+
+  if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
   return data;
 }
 
@@ -16,6 +24,10 @@ const api = {
     request('/auth/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   storeLogin: (email, password) =>
     request('/stores/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  userLogin: (email, password) =>
+    request('/users/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  getAdminDashboard: () => request('/admin/dashboard'),
+  getAdminChainTransactions: (params = '') => request(`/admin/chain-transactions${params ? '?' + params : ''}`),
 
   // Users
   getUsers: () => request('/users'),
@@ -41,14 +53,29 @@ const api = {
 
   // Wallets
   getWallet: (id) => request(`/wallets/${id}`),
-  getWalletBalance: (id) => request(`/wallets/${id}/balance`),
+  getWalletBalance: (id, live = true) => request(`/wallets/${id}/balance?live=${live ? 'true' : 'false'}`),
+  getWalletOnChainBalance: (id) => request(`/wallets/${id}/onchain-balance`),
+  getWalletOnChainTransactions: (id, limit = 25) => request(`/wallets/${id}/onchain-transactions?limit=${limit}`),
+  getWalletActivity: (id) => request(`/wallets/${id}/activity`),
   getTransactions: (id, limit = 50) => request(`/wallets/${id}/transactions?limit=${limit}`),
+  createWalletChallenge: (id, evmAddress) =>
+    request(`/wallets/${id}/metamask/challenge`, { method: 'POST', body: JSON.stringify({ evmAddress }) }),
+  verifyWalletSignature: (id, data) =>
+    request(`/wallets/${id}/metamask/verify`, { method: 'POST', body: JSON.stringify(data) }),
 
   // Sessions
   getSession: (id) => request(`/sessions/${id}`),
   getActiveSessions: (walletId) => request(`/sessions/active/${walletId}`),
   getSessionsByStore: (storeId) => request(`/sessions/store/${storeId}/active`),
   getSessionHistory: (walletId, limit = 50) => request(`/sessions/history/${walletId}?limit=${limit}`),
+  createPaymentIntent: (sessionId, data = {}) =>
+    request(`/sessions/${sessionId}/payment-intent`, { method: 'POST', body: JSON.stringify(data) }),
+  settleSession: (sessionId, data) =>
+    request(`/sessions/${sessionId}/settle`, { method: 'POST', body: JSON.stringify(data) }),
+
+  // Receipts / settlements
+  getReceipts: (params = '') => request(`/receipts${params ? '?' + params : ''}`),
+  getSettlements: (params = '') => request(`/settlements${params ? '?' + params : ''}`),
 };
 
 export default api;

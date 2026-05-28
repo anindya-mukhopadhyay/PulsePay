@@ -5,6 +5,7 @@
 
 # Node dependencies
 node_modules/
+backend/dashboard/dist/
 npm-debug.log
 yarn-error.log
 

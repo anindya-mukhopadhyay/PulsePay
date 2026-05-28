@@ -8,6 +8,10 @@ const SERVICE_TYPES = [
   { id: 'WIFI', name: 'Public WiFi', icon: '📶', color: 'blue', desc: 'Data streaming & session-based access' },
   { id: 'PARKING', name: 'Smart Parking', icon: '🅿️', color: 'orange', desc: 'Automated duration-based parking' },
   { id: 'GYM', name: 'Gym Access', icon: '🏋️', color: 'green', desc: 'Per-minute workout facility access' },
+  { id: 'CONTENT', name: 'Premium Content', icon: '🎬', color: 'purple', desc: 'Per-minute or per-second content unlock billing' },
+  { id: 'COWORK', name: 'Co-working Desk', icon: '💼', color: 'cyan', desc: 'Pay-as-you-use desk or room access' },
+  { id: 'LOUNGE', name: 'Lounge Access', icon: '🛋️', color: 'orange', desc: 'Time-based premium lounge streaming access' },
+  { id: 'STORAGE', name: 'Smart Storage', icon: '📦', color: 'green', desc: 'Usage-based locker and storage utility billing' },
 ];
 
 export default function MyServices() {

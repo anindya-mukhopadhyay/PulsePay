@@ -57,6 +57,8 @@ final class PulsePayViewModel: ObservableObject {
     )
     @Published var onChainSettlements: [OnChainSettlementRecord] = []
     @Published var blockchainSettlementEnabled: Bool = true
+    @Published var blockchainAssets: [WalletAssetBalance] = []
+    @Published var blockchainPortfolioLastUpdatedAt: Date?
     @Published var walletAddress: String = ""
     @Published var isWalletConnected: Bool = false
 
@@ -64,26 +66,61 @@ final class PulsePayViewModel: ObservableObject {
         Task {
             do {
                 print("🔵 Logging in with Firebase JWT...")
-                let address = try await Web3Manager.shared.loginWithFirebaseJWT()
-                let balanceStr = try await Web3Manager.shared.getBalance()
+                _ = try await Web3Manager.shared.loginWithFirebaseJWT()
+                let portfolio = try await Web3Manager.shared.getPortfolio()
                 
                 DispatchQueue.main.async {
-                    self.walletAddress = address
-                    self.blockchainWallet.address = address
-                    
-                    // Parse balance string (e.g. "0.0100 MATIC" -> 0.01)
-                    let rawBalance = balanceStr.replacingOccurrences(of: " MATIC", with: "").trimmingCharacters(in: .whitespaces)
-                    self.blockchainWallet.tokenBalance = Double(rawBalance) ?? 0.0
-                    self.blockchainWallet.status = .connected
-                    self.isWalletConnected = true
+                    self.applyPortfolio(portfolio)
                 }
                 
-                print("🟢 Web3Auth Connected! Address: \(address)")
-                print("🟢 MATIC Balance: \(balanceStr)")
+                print("🟢 MetaMask Connected! Address: \(portfolio.address)")
+                print("🟢 Portfolio Assets: \(portfolio.assets.count)")
             } catch {
-                print("🔴 Web3Auth Login Failed: \(error.localizedDescription)")
+                print("🔴 MetaMask Login Failed: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.lastStopReason = "MetaMask connected, but balance fetch failed: \(error.localizedDescription)"
+                }
             }
         }
+    }
+
+    func refreshBlockchainBalance() {
+        guard isWalletConnected else {
+            connectWeb3Auth()
+            return
+        }
+
+        Task {
+            do {
+                let portfolio = try await Web3Manager.shared.getPortfolio()
+
+                DispatchQueue.main.async {
+                    self.applyPortfolio(portfolio)
+                }
+            } catch {
+                print("🔴 MetaMask balance refresh failed: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.lastStopReason = "Balance refresh failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    private func applyPortfolio(_ portfolio: WalletPortfolioSnapshot) {
+        let activeNetwork = portfolio.activeNetwork ?? blockchainWallet.network
+        let activeNativeAsset = portfolio.assets.first {
+            $0.isNative && $0.network == activeNetwork
+        }
+
+        walletAddress = portfolio.address
+        blockchainAssets = portfolio.assets
+        blockchainPortfolioLastUpdatedAt = portfolio.fetchedAt
+        blockchainWallet.address = portfolio.address
+        blockchainWallet.network = activeNetwork
+        blockchainWallet.tokenSymbol = activeNativeAsset?.symbol ?? activeNetwork.nativeTokenSymbol
+        blockchainWallet.tokenBalance = activeNativeAsset?.balance ?? 0
+        blockchainWallet.status = .connected
+        isWalletConnected = true
     }
 
     func startSuperfluidFlow(receiverAddress: String, rate: Double) {
@@ -336,7 +373,6 @@ final class PulsePayViewModel: ObservableObject {
     func quickTopUp(_ amount: Double) {
         guard amount > 0 else { return }
         wallet.balance += amount
-        blockchainWallet.tokenBalance += amount
     }
 
     func connectDemoBlockchainWallet() {
@@ -346,12 +382,23 @@ final class PulsePayViewModel: ObservableObject {
     }
 
     func disconnectBlockchainWallet() {
+        Web3Manager.shared.disconnect()
+        walletAddress = ""
+        isWalletConnected = false
+        blockchainAssets = []
+        blockchainPortfolioLastUpdatedAt = nil
         blockchainWallet.address = ""
         blockchainWallet.status = .disconnected
+        blockchainWallet.tokenBalance = 0
+        blockchainWallet.tokenSymbol = blockchainWallet.network.nativeTokenSymbol
     }
 
     func switchBlockchainNetwork(to network: BlockchainNetwork) {
         blockchainWallet.network = network
+        blockchainWallet.tokenSymbol = network.nativeTokenSymbol
+        blockchainWallet.tokenBalance = blockchainAssets.first {
+            $0.isNative && $0.network == network
+        }?.balance ?? 0
     }
 
     func toggleGasSponsorship(_ isEnabled: Bool) {
@@ -380,6 +427,72 @@ final class PulsePayViewModel: ObservableObject {
 
     func formatCurrency(_ amount: Double) -> String {
         Self.currencyFormatter.string(from: NSNumber(value: amount)) ?? "INR 0.00"
+    }
+
+    var fundedBlockchainAssets: [WalletAssetBalance] {
+        blockchainAssets.filter { $0.balance > 0 }
+    }
+
+    var displayedBlockchainAssets: [WalletAssetBalance] {
+        let funded = fundedBlockchainAssets
+        return funded.isEmpty ? blockchainAssets : funded
+    }
+
+    var blockchainPortfolioHeadline: String {
+        let fundedCount = fundedBlockchainAssets.count
+        if fundedCount == 0 {
+            return "No funded assets detected"
+        }
+        if fundedCount == 1 {
+            return "1 funded asset detected"
+        }
+        return "\(fundedCount) funded assets detected"
+    }
+
+    var blockchainPortfolioSummary: String {
+        let funded = fundedBlockchainAssets
+        guard !funded.isEmpty else {
+            return "Only the active native balance is 0 on \(blockchainWallet.network.rawValue)."
+        }
+
+        let grouped = Dictionary(grouping: funded, by: { $0.symbol })
+        let totals = grouped
+            .map { symbol, assets in
+                (symbol: symbol, balance: assets.reduce(0) { $0 + $1.balance })
+            }
+            .sorted { left, right in
+                let leftIsActiveSymbol = left.symbol == blockchainWallet.tokenSymbol
+                let rightIsActiveSymbol = right.symbol == blockchainWallet.tokenSymbol
+                if leftIsActiveSymbol != rightIsActiveSymbol {
+                    return leftIsActiveSymbol
+                }
+                return left.symbol < right.symbol
+            }
+
+        var parts = totals.prefix(3).map {
+            formatTokenBalance($0.balance, symbol: $0.symbol)
+        }
+        if totals.count > 3 {
+            parts.append("+\(totals.count - 3) more")
+        }
+        return parts.joined(separator: " + ")
+    }
+
+    func formatTokenBalance(_ amount: Double, symbol: String) -> String {
+        guard amount > 0 else { return "0 \(symbol)" }
+        if amount < 0.000001 {
+            return "<0.000001 \(symbol)"
+        }
+
+        let fractionDigits = amount < 1 ? 8 : 6
+        var formatted = String(format: "%.\(fractionDigits)f", amount)
+        while formatted.last == "0" {
+            formatted.removeLast()
+        }
+        if formatted.last == "." {
+            formatted.removeLast()
+        }
+        return "\(formatted) \(symbol)"
     }
 
     func formatUnits(_ units: Double, for service: UtilityServiceType) -> String {

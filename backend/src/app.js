@@ -12,6 +12,9 @@ import storeRoutes from "./routes/store.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import sessionRoutes from "./routes/session.routes.js";
+import receiptRoutes from "./routes/receipt.routes.js";
+import settlementRoutes from "./routes/settlement.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
@@ -38,6 +41,9 @@ app.use("/api/stores", storeRoutes);
 app.use("/api/wallets", walletRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/receipts", receiptRoutes);
+app.use("/api/settlements", settlementRoutes);
+app.use("/api/admin", adminRoutes);
 
 // ─── 404 catch-all ────────────────────────────────────────
 app.use((_req, res) => {

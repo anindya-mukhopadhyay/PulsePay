@@ -2,7 +2,16 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 
 const STATUS_BADGE = { VERIFIED: 'green', PENDING: 'orange', REJECTED: 'red' };
-const TYPE_BADGE = { GYM: 'purple', EV: 'cyan', WIFI: 'blue', PARKING: 'green' };
+const TYPE_BADGE = {
+  GYM: 'purple',
+  EV: 'cyan',
+  WIFI: 'blue',
+  PARKING: 'green',
+  CONTENT: 'purple',
+  COWORK: 'blue',
+  LOUNGE: 'orange',
+  STORAGE: 'green',
+};
 
 export default function ManageStores() {
   const [stores, setStores] = useState([]);

@@ -2,7 +2,6 @@ import { Router } from "express";
 import Store from "../models/Store.js";
 import Wallet from "../models/Wallet.js";
 import Service from "../models/Service.js";
-import blockchainService from "../services/blockchain.service.js";
 import { asyncHandler } from "../utils/helpers.js";
 
 const router = Router();
@@ -42,11 +41,10 @@ router.post(
       location,
     });
 
-    const evmAddress = blockchainService.generateEvmAddress(`store:${store._id}`);
+    // Real settlement addresses are linked through the MetaMask challenge flow.
     const wallet = await Wallet.create({
       ownerType: "STORE",
       ownerId: store._id,
-      evmAddress,
     });
 
     store.walletId = wallet._id;
