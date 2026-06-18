@@ -37,21 +37,58 @@ PulsePay bridges this gap by providing a frictionless, gasless Web3 payment expe
 
 ## 4. Complete Architecture
 
+The following diagram illustrates the complete technical architecture, specifically highlighting the interaction between the Web2 authentication mechanisms and the Web3 non-custodial infrastructure, as well as the ERC-4337 transaction flow.
+
 ```mermaid
-flowchart TD
-  User["User"] --> iOS["iOS Client (SwiftUI)"]
-  Merchant["Merchant"] --> Dashboard["Web Dashboard (React/Vite)"]
-  
-  iOS --> Auth["Firebase Auth"]
-  iOS --> Web3Auth["Web3Auth (MPC Wallet)"]
-  iOS --> API["Node.js Express Backend"]
-  Dashboard --> API
-  
-  API --> Mongo["MongoDB (State Tracking)"]
-  API --> Alchemy["Alchemy (ERC-4337 Paymaster)"]
-  
-  Alchemy --> Blockchain["EVM Blockchain"]
-  Web3Auth --> iOS
+flowchart TB
+    subgraph Client ["Client Layer"]
+        iOS["📱 iOS App (SwiftUI)"]
+        Dashboard["📊 Web Dashboard (React)"]
+    end
+
+    subgraph AuthLayer ["Authentication & Key Management"]
+        Firebase["🔥 Firebase Auth\n(JWT Issuance)"]
+        Web3Auth["🔐 Web3Auth MPC Network\n(Non-custodial Key Shares)"]
+        KeyStore["💾 Secure Enclave\n(Local Key Share)"]
+    end
+
+    subgraph BackendLayer ["Backend Services"]
+        API["⚙️ Node.js Express API"]
+        Mongo[("🗄️ MongoDB\n(Users, Merchants, State)")]
+    end
+
+    subgraph Web3Layer ["Web3 & ERC-4337 Infrastructure"]
+        Bundler["📦 Alchemy Bundler\n(UserOp Mempool)"]
+        Paymaster["⛽ Alchemy Paymaster\n(Gas Sponsorship)"]
+        SmartAccount["🤖 Smart Contract Account\n(ERC-4337 Wallet)"]
+        Blockchain[("⛓️ EVM Blockchain")]
+    end
+
+    %% User interactions
+    User((User)) -->|Login| iOS
+    Merchant((Merchant)) -->|Manage| Dashboard
+
+    %% Auth Flow
+    iOS -->|1. Social Login| Firebase
+    Firebase -->|2. Returns JWT| iOS
+    iOS -->|3. Passes JWT| Web3Auth
+    Web3Auth -->|4. Reconstructs Key| iOS
+    KeyStore -.->|Local Share| iOS
+
+    %% API Interactions
+    iOS -->|Read/Write State| API
+    Dashboard -->|Analytics & Config| API
+    API <--> Mongo
+
+    %% Transaction Flow
+    iOS -->|5. Signs UserOperation| Bundler
+    Bundler -->|6. Requests Gas| Paymaster
+    Paymaster -.->|7. Sponsors Gas| Bundler
+    Bundler -->|8. Submits Tx| Blockchain
+    Blockchain -->|9. Executes via| SmartAccount
+    
+    %% Relayer indexing
+    Blockchain -.->|10. Emits Events| API
 ```
 
 ## 5. Getting Started
